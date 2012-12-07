@@ -1,7 +1,11 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from django.conf import settings
+try:
+    from django.conf import settings
+except ImportError:
+    # We do not need Django to used this package
+    settings = {}
 
 # Required settings
 MERCHANT_ACCOUNT = getattr(settings, 'ADYEN_MERCHANT_ACCOUNT')

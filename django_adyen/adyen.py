@@ -1,13 +1,18 @@
 import logging
-import datetime
-import urllib
-import urllib2
-import xml.dom.minidom
+log = logging.getLogger(__name__)
 
-log = logging.getLogger('adyen')
+import base64
+import hmac
+from hashlib import sha1
 
-from adyen import settings as adyen_settings
-from adyen import forms as adyen_forms
+from decimal import Decimal
+from datetime import datetime, date, timedelta
+
+from urllib import urlencode
+
+import django_adyen.settings as adyen_settings
+import django_adyen.forms as adyen_forms
+
 
 class Adyen(object):
 
@@ -34,14 +39,19 @@ class Adyen(object):
         'merchantSig', 'shopperLocale')
     )
 
-    def __init__(self, params=None, settings=adyen_settings):
+    def __init__(self, data=None, settings=adyen_settings):
         # This allows us to override settings for the whole class
         self.settings = settings
 
         self.url = 'https://{environment}.adyen.com/hpp/'.format(environment=adyen_settings.ENVIRONMENT)
 
-        assert params, \
-            'Please specify either a request or a set of parameters'
+        assert data, \
+            'Please provide a set of data'
+
+        if 'merchantAccount' not in data:
+            data['merchantAccount'] = self.settings.MERCHANT_ACCOUNT
+
+        self.data = data
 
         # Make sure we convert any data from native Python formats to
         # the format required by Adyen.
@@ -130,25 +140,24 @@ class Adyen(object):
 
         return plaintext
 
-    def get_session_url(self):
-        if self.settings.ONE_PAGE:
-            return self.url + self.URL_SINGLE
-        else:
-            return self.url + self.URL_MULTIPLE
-
-    @staticmethod
-    def get_action(self):
+    def get_redirect_url(self):
         """
         Construct the redirect URL for starting a payment.
         """
 
         # Make sure a signature is present in the data
-        assert self.data.has_key('merchantSig')
+        assert self.data.has_key('merchantSig'), 'Please sign the data before using'
         params = urlencode(self.data)
 
-        session_url = self.get_session_url()
+        action_url = self.get_action()
 
-        return session_url + '?' + params
+        return action_url + '?' + params
+
+    def get_action(self):
+        if self.settings.ONE_PAGE:
+            return self.url + 'pay.shtml'
+        else:
+            return self.url + 'select.shtml'
 
     def sign(self):
         """
@@ -159,30 +168,49 @@ class Adyen(object):
         data_fields = self.data.keys()
 
         # Make sure all required fields are filled in
-        assert self.SESSION_REQUIRED_FIELDS.issubset(data_fields), \
+        assert self.REQUIRED_FIELDS.issubset(data_fields), \
             'Not all required fields are set.'
 
-        plaintext = self._data_to_plaintext(self.SESSION_SIGNATURE_FIELDS)
+        plaintext = self._data_to_plaintext(self.SIGNATURE_FIELDS)
 
         # Set the merchant signature in data
         self.data['merchantSig'] = self._sign_plaintext(plaintext)
 
-        # See whether one of the billing address fields are set
-        # If so, calculate the billing address signature.
-        for address_field in self.ADDRESS_SIGNATURE_FIELDS:
-            if address_field in data_fields:
-                billing_plaintext = \
-                    self._data_to_plaintext(self.ADDRESS_SIGNATURE_FIELDS)
-                self.data['billingAddressSig'] = \
-                    self._sign_plaintext(billing_plaintext)
+        # # See whether one of the billing address fields are set
+        # # If so, calculate the billing address signature.
+        # for address_field in self.ADDRESS_SIGNATURE_FIELDS:
+        #     if address_field in data_fields:
+        #         billing_plaintext = \
+        #             self._data_to_plaintext(self.ADDRESS_SIGNATURE_FIELDS)
+        #         self.data['billingAddressSig'] = \
+        #             self._sign_plaintext(billing_plaintext)
 
-                # No need to continue, we already calculated the signature
-                # for all billing fields
-                break
+        #         # No need to continue, we already calculated the signature
+        #         # for all billing fields
+        #         break
 
-    @classmethod
-    def get_form(cls, data, settings=ogone_settings):
-        log.debug('Sending the following data to Ogone: %s', self.data)
+    def get_form(self, settings=adyen_settings):
+        log.debug('Sending the following data to Adyen: %s', self.data)
         form = adyen_forms.AdyenForm(self.data)
 
         return form
+
+    def is_valid(self):
+        """
+        Validate the data signature for a payment result. Returns True when
+        the signature is valid, False otherwise.
+        """
+
+        data_fields = self.data.keys()
+
+        # Make sure all expected fields are in the result
+        assert self.RESULT_REQUIRED_FIELDS.issubset(data_fields), \
+            'Not all expected fields are present.'
+
+        plaintext = self._data_to_plaintext(self.RESULT_SIGNATURE_FIELDS)
+        signature = self._sign_plaintext(plaintext)
+
+        if not signature == self.data['merchantSig']:
+            return False
+
+        return True
