@@ -41,13 +41,13 @@ a = Adyen(settings={})
 ```python
 from py_adyen.adyen import Adyen
 data = {
-    'merchantReference': '1337',
-    'paymentAmount': 100,
-    'currencyCode': 'EUR',
-    'shipBeforeDate': datetime.now(),
-    'shopperEmail': 'foobar@example.com',
-    'shopperReference': 'user-42',
-    'sessionValidity': datetime.now(),
+    'merchantReference': '1337',           # your internal reference for this payment
+    'paymentAmount': 100,                  # amount in cents
+    'currencyCode': 'EUR',                 # currency, in the 3 letter format (see Adyen docs)
+    'shipBeforeDate': datetime.now(),      # useful for lookups (I guess)
+    'shopperEmail': 'foobar@example.com',  # useful for recurring payments etc.
+    'shopperReference': 'user-42',         # your internal reference for (recurring) lookups etc.
+    'sessionValidity': datetime.now(),     # how long is the payment session valid
 }
 
 a = Adyen(data)
@@ -58,6 +58,9 @@ print form                  # form with hidden items
 print a.get_action()        # action url for the form
 print a.get_redirect_url()  # useable for redirecting (uses GET args)
 ```
+
+## TODO
+Lots! Especially in the API section (only recurring payments are directly supported for now). Help out, make a pull request :)
 
 *****
 ## Acknowledgement
