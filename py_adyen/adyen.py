@@ -48,6 +48,10 @@ class Adyen(object):
 
         assert data, \
             'Please provide a set of data'
+
+        # set the default skin
+        if 'skinCode' not in data and self.settings.DEFAULT_SKIN:
+            data['skinCode'] = self.settings.DEFAULT_SKIN
         self.data = data
 
         # Make sure we convert any data from native Python formats to

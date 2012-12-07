@@ -23,7 +23,7 @@ These options are required:
 `ADYEN_MERCHANT_SECRET`: Your Adyen shared secret
 
 And optional:
-`ADYEN_DEFAULT_SKIN`: You can use this to force a certain skin
+`ADYEN_DEFAULT_SKIN`: Either provide a skin with every payment data, or use this setting
 `ADYEN_ONE_PAGE`: Use Adyens One Page payment? (defaults to True)
 
 `ADYEN_ENVIRONMENT`: Defaults to 'test'
@@ -37,14 +37,35 @@ from py-adyen.adyen import Adyen
 a = Adyen(settings={})
 ```
 
-
 Usage
 =====
 
 
 Standard payments
 -----------------
+```python
+from py_adyen.adyen import Adyen
+data = {
+    'merchantReference': '1337',
+    'paymentAmount': 100,
+    'currencyCode': 'EUR',
+    'shipBeforeDate': datetime.now(),
+    'shopperEmail': 'foobar@example.com',
+    'shopperReference': 'user-42',
+    'merchantAccount': 'MYMERCHANTCODE',
+    'sessionValidity': datetime.now(),
+}
+
+a = Adyen(data)
+a.sign()
+form = a.get_form()
+
+print form
+print a.get_action()
+print a.get_redirect_url()
+```
 
 
-
-*Influenced by the django-ogone, and reused some parts of the (outdated) django-adyen package*
+Acknowledgement
+===============
+Influenced by the django-ogone, and reused some parts of the (outdated) django-adyen package
