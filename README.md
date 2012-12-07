@@ -12,7 +12,7 @@ $ pip install https://github.com/svdgraaf/py-adyen/archive/master.zip
 Hmac, hashlib. If you want to use the API, you need Suds.
 
 ## Settings
-Please see the wiki for available settings
+Please see the wiki for [available settings](https://github.com/svdgraaf/py-adyen/wiki)
 
 ## Usage
 Please see the wiki for [usage examples](https://github.com/svdgraaf/py-adyen/wiki)
