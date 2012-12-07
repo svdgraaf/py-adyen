@@ -5,7 +5,7 @@ Adyen Python implementation. Capable of both single and recurring payments.
 
 Install via pip:
 ```bash
-$ pip install https://github.com/svdgraaf/py-adyen/archive/master.zip
+$ pip install py-adyen
 ```
 
 ## Requirements
