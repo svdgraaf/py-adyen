@@ -11,7 +11,11 @@ from datetime import datetime, date, timedelta
 from urllib import urlencode
 
 import py_adyen.settings as adyen_settings
-import py_adyen.forms as adyen_forms
+try:
+    import py_adyen.forms as adyen_forms
+except:
+    # form not available
+    pass
 
 
 class Adyen(object):
