@@ -25,7 +25,7 @@ setup(
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Framework :: Django',
-        'License :: OSI Approved :: GNU General Public License v3',
+        'License :: OSI Approved :: GNU General Public License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
