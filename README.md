@@ -19,21 +19,21 @@ Settings
 ========
 
 These options are required:
-`ADYEN_MERCHANT_ACCOUNT`: Your Adyen Merchant account name
-`ADYEN_MERCHANT_SECRET`: Your Adyen shared secret
+* `ADYEN_MERCHANT_ACCOUNT`: Your Adyen Merchant account name
+* `ADYEN_MERCHANT_SECRET`: Your Adyen shared secret
 
 And optional:
-`ADYEN_DEFAULT_SKIN`: Either provide a skin with every payment data, or use this setting
-`ADYEN_ONE_PAGE`: Use Adyens One Page payment? (defaults to True)
+* `ADYEN_DEFAULT_SKIN`: Either provide a skin with every payment data, or use this setting
+* `ADYEN_ONE_PAGE`: Use Adyens One Page payment? (defaults to True)
+* `ADYEN_ENVIRONMENT`: Defaults to 'test'
+* `ADYEN_API_USERNAME`: Used for recurring payments (WS user for SOAP)
+* `ADYEN_API_PASSWORD`: Password for your WS user (for SOAP)
 
-`ADYEN_ENVIRONMENT`: Defaults to 'test'
-`ADYEN_API_USERNAME`: Used for recurring payments (WS user for SOAP)
-`ADYEN_API_PASSWORD`: Password for your WS user (for SOAP)
-
-Py-adyen will try to fetch those settings from your Django settings "It Just Works(tm)". But you can always provide your own settings upon initialising of the Adyen instance:
+*****
+Py-adyen will try to fetch those settings from your Django settings "It Just Works(tm)". But you can always provide your own settings upon initialising of the Adyen instance, eg:
 
 ```python
-from py-adyen.adyen import Adyen
+from py_adyen.adyen import Adyen
 a = Adyen(settings={})
 ```
 
