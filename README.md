@@ -3,4 +3,4 @@ py-adyen
 
 Adyen Python implementation
 
-# inspired by the django-ogone package
+*Influenced by the django-ogone, and reused some parts of the (outdated) django-adyen package*

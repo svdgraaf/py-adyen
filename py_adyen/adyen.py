@@ -10,8 +10,8 @@ from datetime import datetime, date, timedelta
 
 from urllib import urlencode
 
-import django_adyen.settings as adyen_settings
-import django_adyen.forms as adyen_forms
+import py_adyen.settings as adyen_settings
+import py_adyen.forms as adyen_forms
 
 
 class Adyen(object):
@@ -43,14 +43,11 @@ class Adyen(object):
         # This allows us to override settings for the whole class
         self.settings = settings
 
+        # set the target url according to the environment setting
         self.url = 'https://{environment}.adyen.com/hpp/'.format(environment=adyen_settings.ENVIRONMENT)
 
         assert data, \
             'Please provide a set of data'
-
-        if 'merchantAccount' not in data:
-            data['merchantAccount'] = self.settings.MERCHANT_ACCOUNT
-
         self.data = data
 
         # Make sure we convert any data from native Python formats to
