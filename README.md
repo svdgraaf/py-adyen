@@ -69,7 +69,8 @@ a.is_valid()  # True when the signature is valid, False if not
 ```
 
 ### Recurring payments
-* Make sure that your account is enabled for recurring payments, as this will otherwise not work *
+** Make sure that your account is enabled for recurring payments, as this will otherwise not work **
+
 The recurring payments is divided in 3 steps.
 * Step 1 is to have the client authorise the first payment, you send a special field with the payment to mark it for recurrence
 * Step 2 is to validate the authorisation (via the regular validation)
