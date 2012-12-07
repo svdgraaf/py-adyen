@@ -8,8 +8,8 @@ except ImportError:
     settings = {}
 
 # Required settings
-MERCHANT_ACCOUNT = getattr(settings, 'ADYEN_MERCHANT_ACCOUNT')
-MERCHANT_SECRET = getattr(settings, 'ADYEN_MERCHANT_SECRET')
+MERCHANT_ACCOUNT = getattr(settings, 'ADYEN_MERCHANT_ACCOUNT', None)
+MERCHANT_SECRET = getattr(settings, 'ADYEN_MERCHANT_SECRET', None)
 
 # Optional settings
 ENVIRONMENT = getattr(settings, 'ADYEN_ENVIRONMENT', 'test')
