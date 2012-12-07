@@ -9,7 +9,7 @@ $ pip install https://github.com/svdgraaf/py-adyen/archive/master.zip
 ```
 
 ## Requirements
-Hmac, hashlib. If you want to use the API, you need Suds.
+Hmac, hashlib. If you want to use the API, you need Suds. If you want to use the forms, you need Django as well.
 
 ## Settings
 Please see the wiki for [available settings](https://github.com/svdgraaf/py-adyen/wiki)
@@ -18,7 +18,7 @@ Please see the wiki for [available settings](https://github.com/svdgraaf/py-adye
 Please see the wiki for [usage examples](https://github.com/svdgraaf/py-adyen/wiki)
 
 ## TODO
-Lots! Especially in the API section (only recurring payments are directly supported for now). Help out, make a pull request :)
+Lots! Especially in the API section (only recurring payments are directly supported for now). Help out, make a pull request :) Write tests!
 
 *****
 ## Acknowledgement
