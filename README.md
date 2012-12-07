@@ -1,22 +1,19 @@
-py-adyen
-========
+# py-adyen
 
 Adyen Python implementation
 
-Installation
-============
+## Installation
 
 Install via pip:
 ```bash
 $ pip install https://github.com/svdgraaf/py-adyen/archive/master.zip
 ```
 
-Requirements
-============
+## Requirements
+
 Hmac, hashlib. If you want to use the API, you need Suds.
 
-Settings
-========
+## Settings
 
 These options are required:
 * `ADYEN_MERCHANT_ACCOUNT`: Your Adyen Merchant account name
@@ -37,12 +34,10 @@ from py_adyen.adyen import Adyen
 a = Adyen(settings={})
 ```
 
-Usage
-=====
+## Usage
 
+### Standard payments
 
-Standard payments
------------------
 ```python
 from py_adyen.adyen import Adyen
 data = {
@@ -64,7 +59,6 @@ print a.get_action()        # action url for the form
 print a.get_redirect_url()  # useable for redirecting (uses GET args)
 ```
 
-
-Acknowledgement
-===============
-Influenced by the django-ogone, and reused some parts of the (outdated) django-adyen package
+*****
+## Acknowledgement
+Influenced by django-ogone, and reused some parts of the (outdated) django-adyen package
