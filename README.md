@@ -60,9 +60,9 @@ a = Adyen(data)
 a.sign()
 form = a.get_form()
 
-print form
-print a.get_action()
-print a.get_redirect_url()
+print form                  # form with hidden items
+print a.get_action()        # action url for the form
+print a.get_redirect_url()  # useable for redirecting (uses GET args)
 ```
 
 
