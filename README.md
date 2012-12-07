@@ -66,6 +66,7 @@ from py_adyen.adyen import Adyen
 data = request.POST.dict()
 a = Adyen(data)
 a.is_valid()  # True when the signature is valid, False if not
+```
 
 ### Recurring payments
 * Make sure that your account is enabled for recurring payments, as this will otherwise not work *
