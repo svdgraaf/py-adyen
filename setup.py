@@ -13,7 +13,7 @@ except:
 
 setup(
     name = 'py-adyen',
-    version = '0.1.4',
+    version = '0.1.5',
     description='Python/Django interface to the Adyen payment gateway.',
     long_description=README,
     author = 'Sander van de Graaf',

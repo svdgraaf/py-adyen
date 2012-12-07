@@ -7,21 +7,22 @@ class Api(object):
     def __init__(self, settings=adyen_settings):
         self.settings = settings
 
-    def authorise_recurring_payment(self, reference, statement, amount, shopper, recurring_detail_reference='LATEST'):
-        assert 'email' in shopper, 'Shopper has no email'
-        assert 'reference' in shopper, 'Shopper has no reference'
-        assert 'currency' in amount, 'Amount has no currency'
-        assert 'value' in amount, 'Amount has no value'
+    def authorise_recurring_payment(self, reference, statement, amount, currency, shopper_reference, shopper_email, shopper_ip=None, recurring_detail_reference='LATEST'):
         assert statement != '', 'Statement is needed'
+        assert reference != '', 'Reference is needed'
+        assert shopper_reference != '', 'Shopper reference is needed'
+        assert shopper_email != '', 'Shopper email is needed'
+        assert currency != '', 'Currency is needed'
+        assert int(amount) > 0, 'Amount is needed'
 
         payment = self.payment_service.factory.create('PaymentRequest')
-        payment.shopperReference = shopper['reference']
-        payment.shopperEmail = shopper['email']
+        payment.shopperReference = shopper_reference
+        payment.shopperEmail = shopper_email
         payment.recurring.contract = 'RECURRING'
         payment.merchantAccount = adyen_settings.MERCHANT_ACCOUNT
         payment.selectedRecurringDetailReference = recurring_detail_reference
-        payment.amount.currency = amount['currency']
-        payment.amount.value = amount['value']
+        payment.amount.currency = currency
+        payment.amount.value = amount
         payment.reference = reference
         payment.shopperInteraction = 'ContAuth'
 
