@@ -52,7 +52,13 @@ class Adyen(object):
         # set the default skin
         if 'skinCode' not in data and self.settings.DEFAULT_SKIN:
             data['skinCode'] = self.settings.DEFAULT_SKIN
+
+        # set the default merchant account
+        if 'merchantAccount' not in data and self.settings.MERCHANT_ACCOUNT:
+            data['merchantAccount'] = self.settings.MERCHANT_ACCOUNT
+
         self.data = data
+
 
         # Make sure we convert any data from native Python formats to
         # the format required by Adyen.

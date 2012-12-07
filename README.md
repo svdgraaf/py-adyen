@@ -52,7 +52,6 @@ data = {
     'shipBeforeDate': datetime.now(),
     'shopperEmail': 'foobar@example.com',
     'shopperReference': 'user-42',
-    'merchantAccount': 'MYMERCHANTCODE',
     'sessionValidity': datetime.now(),
 }
 
