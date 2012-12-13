@@ -1,5 +1,5 @@
 from suds.client import Client
-from adyen import settings as adyen_settings
+from py_adyen import settings as adyen_settings
 # TODO: make this into seperate objects for payment/recurring?
 
 
