@@ -3,8 +3,16 @@ logger = logging.getLogger(__name__)
 
 try:
     from django.conf import settings
+    from django.core.exceptions import ImproperlyConfigured
+    try:
+        MERCHANT_ACCOUNT = getattr(settings, 'ADYEN_MERCHANT_ACCOUNT', None)
+    except ImproperlyConfigured:
+        logger.warning('Django settings are not configured')
+        # if Django is available, but settings aren't configured
+        settings = {}
 except ImportError:
     # We do not need Django to used this package
+    logger.warning('Django settings are not available')
     settings = {}
 
 # Required settings
