@@ -18,3 +18,4 @@ API_PASSWORD = getattr(settings, 'ADYEN_API_PASSWORD', None)
 
 DEFAULT_SKIN = getattr(settings, 'ADYEN_DEFAULT_SKIN', None)
 ONE_PAGE = getattr(settings, 'ADYEN_ONE_PAGE', True)
+SIGNING_METHOD = getattr(settings, 'ADYEN_SIGNING_METHOD', 'sha1').lower()
