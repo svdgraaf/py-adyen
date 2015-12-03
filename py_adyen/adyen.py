@@ -3,12 +3,15 @@ log = logging.getLogger(__name__)
 
 import base64
 import hmac
-from hashlib import sha1
+from hashlib import sha256, sha1
+import binascii
+from collections import OrderedDict
 
 from decimal import Decimal
 from datetime import datetime, date, timedelta
 
 from urllib import urlencode
+import re
 
 import py_adyen.settings as adyen_settings
 try:
@@ -19,8 +22,7 @@ except:
 
 
 class Adyen(object):
-
-    SIGNATURE_FIELDS = (
+    SHA1_SIGNATURE_FIELDS = (
         'paymentAmount', 'currencyCode', 'shipBeforeDate',
         'merchantReference', 'skinCode', 'merchantAccount',
         'sessionValidity', 'shopperEmail', 'shopperReference',
@@ -28,14 +30,11 @@ class Adyen(object):
         'billingAddressType', 'recurringContract', 'billingAddressType',
         'deliveryAddressType',
     )
+    SHA256_IGNORE_FIELDS_RE = re.compile('^(?:sig|merchantSig|ignore\..*)$')
 
     REQUIRED_FIELDS = frozenset((
         'merchantReference', 'paymentAmount', 'currencyCode',
         'shipBeforeDate', 'skinCode', 'merchantAccount', 'sessionValidity')
-    )
-
-    RESULT_SIGNATURE_FIELDS = (
-        'authResult', 'pspReference', 'merchantReference', 'skinCode'
     )
 
     RESULT_REQUIRED_FIELDS = frozenset((
@@ -48,7 +47,7 @@ class Adyen(object):
         self.settings = settings
 
         # set the target url according to the environment setting
-        self.url = 'https://{environment}.adyen.com/hpp/'.format(environment=adyen_settings.ENVIRONMENT)
+        self.url = 'https://{}.adyen.com/hpp/'.format(adyen_settings.ENVIRONMENT)
 
         assert data, \
             'Please provide a set of data'
@@ -63,10 +62,24 @@ class Adyen(object):
 
         self.data = data
 
+        self._set_signing_method(self.settings.SIGNING_METHOD)
 
         # Make sure we convert any data from native Python formats to
         # the format required by Adyen.
         self.convert()
+
+    def _set_signing_method(self, method):
+        self.settings.SIGNING_METHOD = method
+        if method == 'sha256':
+            self.RESULT_SIGNATURE_FIELDS = (
+                'authResult', 'merchantReference', 'merchantReturnData', 'paymentMethod',
+                'pspReference', 'shopperLocale', 'skinCode'
+            )
+        else:
+            self.RESULT_SIGNATURE_FIELDS = (
+                'authResult', 'pspReference', 'merchantReference', 'skinCode',
+                'merchantReturnData',
+            )
 
     @classmethod
     def _convert_date(cls, value):
@@ -137,18 +150,36 @@ class Adyen(object):
 
         Source: Adyen Python signature implementation example.
         """
+        if self.settings.SIGNING_METHOD == 'sha1':
+            hm = hmac.new(self.settings.MERCHANT_SECRET, plaintext, sha1)
+            hm = base64.encodestring(hm.digest()).strip()
+        else:
+            hmac_key = binascii.a2b_hex(self.settings.MERCHANT_SECRET)
+            hm = hmac.new(hmac_key, plaintext, sha256)
+            hm = base64.b64encode(hm.digest())
+        return hm
 
-        hm = hmac.new(self.settings.MERCHANT_SECRET, plaintext, sha1)
-        return base64.encodestring(hm.digest()).strip()
-
-    def _data_to_plaintext(self, fields):
+    def _data_to_plaintext(self, included_fields=[]):
         """
-        Concatenate the specified `fields` from the `data` dictionary.
+        Concatenate the specified `included_fields` from the `data` dictionary.
+        When SHA256 is used and `included_fields` aren't specified,
+            exclude ones that match excluding rule.
+        See https://docs.adyen.com/pages/viewpage.action?pageId=5376964
         """
-        plaintext = ''
-        for field in fields:
-            plaintext += self.data.get(field, '').encode('utf-8')
+        if self.settings.SIGNING_METHOD == 'sha1':
+            plaintext = ''
+            for field in included_fields:
+                plaintext += self.data.get(field, '').encode('utf-8')
+        else:
+            def _escape(val):
+                return val.replace('\\', '\\\\').replace(':', '\\:')
 
+            data = OrderedDict(
+                sorted([(k, v) for k, v in self.data.items()
+                        if not (included_fields and k not in included_fields
+                                or self.SHA256_IGNORE_FIELDS_RE.match(k))
+                        ], key=lambda t: t[0]))
+            plaintext = ':'.join(map(_escape, data.keys() + data.values()))
         return plaintext
 
     def get_redirect_url(self):
@@ -157,7 +188,7 @@ class Adyen(object):
         """
 
         # Make sure a signature is present in the data
-        assert self.data.has_key('merchantSig'), 'Please sign the data before using'
+        assert 'merchantSig' in self.data, 'Please sign the data before using'
         params = urlencode(self.data)
 
         action_url = self.get_action()
@@ -182,9 +213,13 @@ class Adyen(object):
         assert self.REQUIRED_FIELDS.issubset(data_fields), \
             'Not all required fields are set.'
 
-        plaintext = self._data_to_plaintext(self.SIGNATURE_FIELDS)
-
         # Set the merchant signature in data
+        if self.settings.SIGNING_METHOD == 'sha1':
+            # signing string includes only these fields in specific order
+            plaintext = self._data_to_plaintext(self.SHA1_SIGNATURE_FIELDS)
+        else:
+            # signing string includes all fields except ones matching SHA256_IGNORE_FIELDS_RE
+            plaintext = self._data_to_plaintext()
         self.data['merchantSig'] = self._sign_plaintext(plaintext)
 
         # # See whether one of the billing address fields are set
